@@ -1,0 +1,23 @@
+default:
+  tags:
+  - <RUNNER_NAME(IF ANY)>
+  
+stages:
+  - test
+
+test:
+  stage: test
+  only:
+    refs:
+      - <BRANCH_NAME>
+
+    changes:
+      - json_files/*
+
+  image: python:3.6
+  script:
+    - apt-get update && apt-get install -y git
+    - apt-get install jsonlint
+    - export DIR_CHANGE=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA)
+    - export CHANGED_JSON=$(find $DIR_CHANGE -maxdepth 1 -type f -name "*.json")
+    - for FILE in $CHANGED_JSON; do jsonlint-php $FILE; done
